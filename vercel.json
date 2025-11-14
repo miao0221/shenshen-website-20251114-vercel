@@ -1,11 +1,16 @@
 {
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build"
+    }
+  ],
   "routes": [
-    // 静态资源文件直接返回
     {
       "src": "/(.*\\.(css|js|jpg|png|svg|ico))",
       "dest": "/$1"
     },
-    // 所有其他路径回退到 index.html (用于 SPA 路由)
     {
       "src": "/(.*)",
       "dest": "/index.html"
