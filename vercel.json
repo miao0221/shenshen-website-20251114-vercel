@@ -1,17 +1,15 @@
 {
+  "routes": [
+    {
+      "src": "/(.*\\.(css|js|jpg|png|svg|ico))",
+      "dest": "/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
   "rewrites": [
-    { "source": "/login", "destination": "/pages/login.html" },
-    { "source": "/register", "destination": "/pages/login.html" },
-    { "source": "/auth", "destination": "/pages/auth.html" },
-    { "source": "/profile", "destination": "/pages/profile.html" },
-    { "source": "/admin", "destination": "/pages/admin.html" },
-    { "source": "/music", "destination": "/pages/music.html" },
-    { "source": "/video", "destination": "/pages/video.html" },
-    { "source": "/timeline", "destination": "/pages/timeline.html" },
-    { "source": "/awards", "destination": "/pages/awards.html" },
-    { "source": "/business", "destination": "/pages/business.html" },
-    { "source": "/interviews", "destination": "/pages/interviews.html" },
-    { "source": "/community", "destination": "/pages/community.html" },
-    { "source": "/fans", "destination": "/pages/fans.html" }
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

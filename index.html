@@ -20,27 +20,21 @@
                 </div>
             </div>
             <ul class="nav-menu">
-                <li class="nav-item"><a href="index.html" class="nav-link">首页</a></li>
-                <li class="nav-item"><a href="pages/music.html" class="nav-link">音乐</a></li>
-                <li class="nav-item"><a href="pages/video.html" class="nav-link">视频</a></li>
-                <li class="nav-item"><a href="pages/timeline.html" class="nav-link">时间轴</a></li>
-                <li class="nav-item"><a href="pages/awards.html" class="nav-link">奖项</a></li>
-                <li class="nav-item"><a href="pages/business.html" class="nav-link">商务</a></li>
-                <li class="nav-item"><a href="pages/interviews.html" class="nav-link">采访</a></li>
-                <li class="nav-item"><a href="pages/fans.html" class="nav-link">粉丝广场</a></li>
-                <li class="nav-item"><a href="pages/login.html" class="nav-link">登录/注册</a></li>
+                <li class="nav-item"><a href="/" class="nav-link" data-route="/">首页</a></li>
+                <li class="nav-item"><a href="/music" class="nav-link" data-route="/music">音乐</a></li>
+                <li class="nav-item"><a href="/video" class="nav-link" data-route="/video">视频</a></li>
+                <li class="nav-item"><a href="/timeline" class="nav-link" data-route="/timeline">时间轴</a></li>
+                <li class="nav-item"><a href="/awards" class="nav-link" data-route="/awards">奖项</a></li>
+                <li class="nav-item"><a href="/business" class="nav-link" data-route="/business">商务</a></li>
+                <li class="nav-item"><a href="/interviews" class="nav-link" data-route="/interviews">采访</a></li>
+                <li class="nav-item"><a href="/fans" class="nav-link" data-route="/fans">粉丝广场</a></li>
+                <li class="nav-item"><a href="/login" class="nav-link" data-route="/login">登录/注册</a></li>
             </ul>
         </nav>
     </header>
     
-    <main>
-        <section class="hero">
-            <h1>欢迎来到周深粉丝网站</h1>
-            <p>这里是周深粉丝的聚集地，分享他的音乐、视频和最新动态。</p>
-            <div id="auth-status">
-                <!-- 登录状态会在这里显示 -->
-            </div>
-        </section>
+    <main id="app">
+        <!-- SPA内容将在这里动态加载 -->
     </main>
 
     <!-- 搜索覆盖层 -->
@@ -62,6 +56,8 @@
     <script type="module" src="js/config.js"></script>
     <script type="module" src="js/search-ui.js"></script>
     <script type="module" src="js/emergency-search-close.js"></script>
+    <script type="module" src="js/core/Router.js"></script>
+    <script type="module" src="js/core/AppState.js"></script>
     <script type="module" src="js/main.js"></script>
 </body>
 </html>
