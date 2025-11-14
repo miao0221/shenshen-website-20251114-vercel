@@ -48,18 +48,12 @@ async function checkAuthStatus() {
 eventBus.on('userLogin', (user) => {
     appState.setUser(user);
     checkAuthStatus();
-    
-    // 如果用户在登录页登录成功，跳转到首页
-    if (appState.getCurrentPage() === 'login') {
-        router.navigate('/');
-    }
 });
 
-// 监听用户退出事件
+// 监听用户登出事件
 eventBus.on('userLogout', () => {
     appState.setUser(null);
     checkAuthStatus();
+    // 重定向到首页
     router.navigate('/');
 });
-
-export { router, appState, eventBus };

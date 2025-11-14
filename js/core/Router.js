@@ -48,10 +48,9 @@ class Router {
         
         // 路由守卫
         if (!await this.canAccessRoute(route)) {
-            // 如果无法访问，重定向到登录页（如果需要登录）
-            if (!route.public) {
-                path = '/login';
-                this.navigate(path, pushState);
+            // 如果无法访问且不是公共路由，并且当前路径不是登录页，则重定向到登录页
+            if (!route.public && path !== '/login') {
+                this.navigate('/login', pushState);
                 return;
             }
         }
@@ -149,7 +148,6 @@ class Router {
 }
 
 // 创建并导出路由实例
-const router = new Router();
+export const router = new Router();
 
-export { router };
 export default Router;
