@@ -1,5 +1,148 @@
 // 后台管理模块
 import { initSupabase } from '../config.js';
+import { checkAuthStatus, getCurrentUser } from './auth.js';
+import { supabase } from '../api/supabaseClient.js';
+
+// 初始化管理模块
+export async function init() {
+    console.log('初始化管理模块...');
+    
+    // 检查用户是否已登录
+    const isLoggedIn = checkAuthStatus();
+    if (!isLoggedIn) {
+        alert('请先登录');
+        // 在SPA中，这里应该使用路由导航而不是页面跳转
+        // window.location.href = '../pages/login.html';
+        return;
+    }
+    
+    // 检查用户是否为管理员
+    const user = getCurrentUser();
+    if (!user) {
+        console.error('无法获取用户信息');
+        return;
+    }
+    
+    // 在实际应用中，这里应该检查用户的角色权限
+    // 例如通过查询用户资料中的admin字段或角色表
+    const isAdmin = await checkAdminRole(user.id);
+    if (!isAdmin) {
+        alert('您没有管理员权限');
+        // 在SPA中，这里应该使用路由导航而不是页面跳转
+        // window.location.href = '../index.html';
+        return;
+    }
+    
+    // 加载管理界面
+    loadAdminInterface();
+    
+    // 绑定事件
+    bindEvents();
+}
+
+// 检查用户是否为管理员
+async function checkAdminRole(userId) {
+    try {
+        // 在实际应用中，这里应该查询用户的角色信息
+        // 这里简化处理，假设用户ID为特定值时为管理员
+        // 或者查询用户资料中的admin字段
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('is_admin')
+            .eq('id', userId)
+            .single();
+        
+        if (error) throw error;
+        
+        return data?.is_admin || false;
+    } catch (error) {
+        console.error('检查管理员权限失败:', error);
+        return false;
+    }
+}
+
+// 加载管理界面
+function loadAdminInterface() {
+    const container = document.getElementById('admin-container');
+    if (!container) return;
+    
+    container.innerHTML = `
+        <div class="admin-header">
+            <h1>管理后台</h1>
+        </div>
+        
+        <div class="admin-content">
+            <div class="admin-menu">
+                <ul>
+                    <li><a href="#" data-tab="music">音乐管理</a></li>
+                    <li><a href="#" data-tab="video">视频管理</a></li>
+                    <li><a href="#" data-tab="users">用户管理</a></li>
+                    <li><a href="#" data-tab="posts">社区管理</a></li>
+                </ul>
+            </div>
+            
+            <div class="admin-main">
+                <div id="admin-tab-content">
+                    <p>请选择管理功能</p>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// 绑定事件
+function bindEvents() {
+    // 管理菜单点击事件
+    document.querySelectorAll('.admin-menu a').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const tab = e.target.getAttribute('data-tab');
+            loadAdminTab(tab);
+        });
+    });
+}
+
+// 加载管理标签页
+function loadAdminTab(tab) {
+    const content = document.getElementById('admin-tab-content');
+    if (!content) return;
+    
+    switch (tab) {
+        case 'music':
+            content.innerHTML = `
+                <h2>音乐管理</h2>
+                <p>音乐管理功能正在开发中...</p>
+                <button id="add-music-btn" class="btn">添加音乐</button>
+            `;
+            break;
+        case 'video':
+            content.innerHTML = `
+                <h2>视频管理</h2>
+                <p>视频管理功能正在开发中...</p>
+                <button id="add-video-btn" class="btn">添加视频</button>
+            `;
+            break;
+        case 'users':
+            content.innerHTML = `
+                <h2>用户管理</h2>
+                <p>用户管理功能正在开发中...</p>
+            `;
+            break;
+        case 'posts':
+            content.innerHTML = `
+                <h2>社区管理</h2>
+                <p>社区管理功能正在开发中...</p>
+            `;
+            break;
+        default:
+            content.innerHTML = '<p>未知的管理功能</p>';
+    }
+}
+
+export default { init };
+
+// 后台管理模块
+import { initSupabase } from '../config.js';
 import { authManager } from './auth.js';
 
 class AdminManager {

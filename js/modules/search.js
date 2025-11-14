@@ -1,18 +1,21 @@
 // 全局搜索模块
 import { initSupabase } from '../config.js';
+import { supabase } from '../api/supabaseClient.js';
+import { musicApi } from '../api/musicApi.js';
+import { videoApi } from '../api/videoApi.js';
 
 class SearchManager {
     constructor() {
         this.supabase = initSupabase();
         this.searchTimeout = null;
+        this.musicCache = new Map();
+        this.videoCache = new Map();
+        this.cacheTimeout = 5 * 60 * 1000; // 5分钟
         this.init();
     }
 
     init() {
-        document.addEventListener('DOMContentLoaded', () => {
-            this.setupSearchElements();
-            this.setupEventListeners();
-        });
+        console.log('初始化搜索管理器...');
     }
 
     setupSearchElements() {
@@ -142,35 +145,74 @@ class SearchManager {
         }
     }
 
+    async searchAll(query) {
+        if (!query || query.trim().length < 2) {
+            return [];
+        }
+
+        try {
+            // 并行搜索音乐和视频
+            const [musicResults, videoResults] = await Promise.all([
+                this.searchMusic(query),
+                this.searchVideos(query)
+            ]);
+
+            // 合并结果
+            const allResults = [...musicResults, ...videoResults];
+            
+            // 按相关性排序（这里简化处理）
+            return allResults.sort((a, b) => {
+                // 简单按标题匹配度排序
+                const aMatch = a.title.toLowerCase().includes(query.toLowerCase()) ? 1 : 0;
+                const bMatch = b.title.toLowerCase().includes(query.toLowerCase()) ? 1 : 0;
+                return bMatch - aMatch;
+            });
+        } catch (error) {
+            console.error('搜索所有内容失败:', error);
+            return [];
+        }
+    }
+
     async fetchSearchSuggestions(query) {
         try {
-            // 获取音乐标题建议
-            const { data: songsData, error: songsError } = await this.supabase
-                .from('songs')
-                .select('id, title')
-                .ilike('title', `%${query}%`)
-                .limit(3);
-
-            if (songsError) throw songsError;
-
-            // 获取视频标题建议
-            const { data: videosData, error: videosError } = await this.supabase
-                .from('videos')
-                .select('id, title')
-                .ilike('title', `%${query}%`)
-                .limit(3);
-
-            if (videosError) throw videosError;
-
-            // 合并建议并渲染
-            const suggestions = [
-                ...songsData.map(item => ({ id: item.id, title: item.title, type: '音乐' })),
-                ...videosData.map(item => ({ id: item.id, title: item.title, type: '视频' }))
-            ].slice(0, 5);
-
-            this.renderSuggestions(suggestions, query);
+            const results = await this.searchAll(query);
+            this.renderSuggestions(results.slice(0, 5), query);
         } catch (error) {
             console.error('获取搜索建议失败:', error);
+        }
+    }
+
+    // 搜索音乐
+    async searchMusic(query) {
+        try {
+            const musicData = await musicApi.searchMusic({ search: query });
+            
+            return musicData.map(item => ({
+                id: item.id,
+                title: item.title,
+                description: item.album || item.description || '',
+                type: '音乐'
+            }));
+        } catch (error) {
+            console.error('搜索音乐失败:', error);
+            return [];
+        }
+    }
+
+    // 搜索视频
+    async searchVideos(query) {
+        try {
+            const videoData = await videoApi.searchVideos({ search: query });
+            
+            return videoData.map(item => ({
+                id: item.id,
+                title: item.title,
+                description: item.description || '',
+                type: '视频'
+            }));
+        } catch (error) {
+            console.error('搜索视频失败:', error);
+            return [];
         }
     }
 
@@ -221,29 +263,13 @@ class SearchManager {
                 document.body.style.overflow = 'hidden'; // 防止背景滚动
             }
 
-            // 搜索音乐
-            const { data: songs, error: songsError } = await this.supabase
-                .from('songs')
-                .select('*')
-                .or(`title.ilike.%${query}%,album.ilike.%${query}%,lyrics.ilike.%${query}%`);
-
-            if (songsError) throw songsError;
-
-            // 搜索视频
-            const { data: videos, error: videosError } = await this.supabase
-                .from('videos')
-                .select('*')
-                .or(`title.ilike.%${query}%,description.ilike.%${query}%`);
-
-            if (videosError) throw videosError;
-
-            // 搜索标签
-            const { data: tags, error: tagsError } = await this.supabase
-                .from('tags')
-                .select('*')
-                .ilike('name', `%${query}%`);
-
-            if (tagsError) throw tagsError;
+            // 使用新的API进行搜索
+            const results = await this.searchAll(query);
+            
+            // 分离音乐和视频结果
+            const songs = results.filter(r => r.type === '音乐');
+            const videos = results.filter(r => r.type === '视频');
+            const tags = []; // 暂时不支持标签搜索
 
             // 渲染搜索结果
             this.renderSearchResults({ songs, videos, tags }, query);
@@ -252,48 +278,26 @@ class SearchManager {
         }
     }
 
-    async searchSongs(query) {
+    // 根据ID获取音乐详情
+    async getMusicById(id) {
         try {
-            const { data, error } = await this.supabase
-                .from('songs')
-                .select('*')
-                .or(`title.ilike.%${query}%,album.ilike.%${query}%,lyrics.ilike.%${query}%`)
-                .order('release_date', { ascending: false });
-
-            if (error) throw error;
-            return data;
+            const musicData = await musicApi.getMusicById(id);
+            return musicData;
         } catch (error) {
-            console.error('搜索音乐失败:', error);
-            return [];
+            console.error('获取音乐详情失败:', error);
+            return null;
         }
     }
 
-    async searchVideos(query) {
+    // 根据ID获取视频详情
+    async getVideoById(id) {
         try {
-            const { data, error } = await this.supabase
-                .from('videos')
-                .select('*')
-                .or(`title.ilike.%${query}%,description.ilike.%${query}%`)
-                .order('publish_date', { ascending: false });
-
-            if (error) throw error;
-            return data;
+            const videoData = await videoApi.getVideoById(id);
+            return videoData;
         } catch (error) {
-            console.error('搜索视频失败:', error);
-            return [];
+            console.error('获取视频详情失败:', error);
+            return null;
         }
-    }
-
-    async searchInterviews(query) {
-        // 由于数据库模式中没有采访表，暂时返回空数组
-        // 如果将来添加了采访表，可以在这里实现相关搜索逻辑
-        return [];
-    }
-
-    async searchAwards(query) {
-        // 由于数据库模式中没有奖项表，暂时返回空数组
-        // 如果将来添加了奖项表，可以在这里实现相关搜索逻辑
-        return [];
     }
 
     renderSearchResults(results, query) {
@@ -409,11 +413,11 @@ class SearchManager {
         switch (type) {
             case '音乐':
             case 'song':
-                window.location.href = `music.html?song=${id}`;
+                window.location.href = `music.html?id=${id}`;
                 break;
             case '视频':
             case 'video':
-                window.location.href = `video.html?video=${id}`;
+                window.location.href = `video.html?id=${id}`;
                 break;
             case 'tag':
                 // 标签导航逻辑可以根据需要实现

@@ -1,402 +1,285 @@
 // 视频模块
 import { initSupabase } from '../../config.js';
+import { videoApi } from '../api/videoApi.js';
+import { searchManager } from './search.js';
 
-(function () {
-    'use strict';
+// 初始化视频模块
+export async function init() {
+    console.log('初始化视频模块...');
+    
+    // 加载视频数据
+    await loadVideos();
+    
+    // 绑定事件
+    bindEvents();
+}
 
-    // 初始化Supabase客户端
-    const supabase = initSupabase();
-
-    // 当前视频数据
-    let allVideos = [];
-    let filteredVideos = [];
-    let currentVideo = null;
-    let userFavorites = [];
-
-    // DOM元素
-    const elements = {
-        categoryFilter: document.getElementById('category-filter'),
-        searchInput: document.getElementById('search-input'),
-        resetFiltersBtn: document.getElementById('reset-filters'),
-        videoContainer: document.getElementById('video-container'),
-        loadingIndicator: document.getElementById('loading'),
-        noResults: document.getElementById('no-results'),
-        modal: document.getElementById('video-modal'),
-        closeModal: document.querySelector('.close'),
-        videoPlayer: document.getElementById('video-player'),
-        modalTitle: document.getElementById('modal-title'),
-        modalPublishDate: document.getElementById('modal-publish-date'),
-        modalDuration: document.getElementById('modal-duration'),
-        modalViews: document.getElementById('modal-views'),
-        videoTags: document.getElementById('video-tags'),
-        modalDescription: document.getElementById('modal-description'),
-        favoriteButton: document.getElementById('favorite-button'),
-        commentText: document.getElementById('comment-text'),
-        submitCommentBtn: document.getElementById('submit-comment'),
-        commentsContainer: document.getElementById('comments-container')
-    };
-
-    // 页面加载完成后初始化
-    document.addEventListener('DOMContentLoaded', async function () {
-        if (!document.querySelector('.video-section')) return;
-
-        initializeEventListeners();
-        await loadVideos();
-    });
-
-    // 初始化事件监听器
-    function initializeEventListeners() {
-        // 筛选器事件
-        elements.categoryFilter.addEventListener('change', filterVideos);
-        elements.searchInput.addEventListener('input', filterVideos);
-        elements.resetFiltersBtn.addEventListener('click', resetFilters);
-
-        // 模态框事件
-        elements.closeModal.addEventListener('click', closeVideoModal);
-        window.addEventListener('click', function (event) {
-            if (event.target === elements.modal) {
-                closeVideoModal();
-            }
-        });
-
-        // 收藏和评论事件
-        elements.favoriteButton.addEventListener('click', toggleFavorite);
-        elements.submitCommentBtn.addEventListener('click', submitComment);
-    }
-
-    // 从Supabase加载视频数据
-    async function loadVideos() {
+// 加载视频数据
+async function loadVideos() {
+    try {
+        // 显示加载指示器
         showLoading(true);
-
-        try {
-            // 获取视频数据
-            const { data: videosData, error: videosError } = await supabase
-                .from('videos')
-                .select('*')
-                .order('publish_date', { ascending: false });
-
-            if (videosError) throw videosError;
-
-            // 获取视频标签数据
-            const { data: videoTagsData, error: tagsError } = await supabase
-                .from('video_tags')
-                .select(`
-                    video_id,
-                    tags(name)
-                `);
-
-            if (tagsError) throw tagsError;
-
-            // 获取标签数据
-            const { data: tagsData, error: allTagsError } = await supabase
-                .from('tags')
-                .select('*');
-
-            if (allTagsError) throw allTagsError;
-
-            // 整理视频数据
-            allVideos = videosData.map(video => {
-                // 查找该视频的标签
-                const videoTagRelations = videoTagsData.filter(vt => vt.video_id === video.id);
-                const videoTags = videoTagRelations.map(vt => {
-                    const tag = tagsData.find(t => t.id === vt.tags.id);
-                    return tag ? tag.name : null;
-                }).filter(tag => tag !== null);
-
-                return {
-                    ...video,
-                    formattedDuration: formatDuration(video.duration),
-                    formattedPublishDate: formatDate(video.publish_date),
-                    tags: videoTags
-                };
-            });
-
-            filteredVideos = [...allVideos];
-            renderVideos(filteredVideos);
-        } catch (error) {
-            console.error('加载视频数据失败:', error);
-            elements.videoContainer.innerHTML = '<p class="error">加载视频数据失败，请稍后重试。</p>';
-        } finally {
-            showLoading(false);
-        }
+        
+        // 获取所有视频数据
+        const videoData = await videoApi.getAllVideos();
+        
+        // 显示视频列表
+        displayVideos(videoData);
+        
+        // 隐藏加载指示器
+        showLoading(false);
+    } catch (error) {
+        console.error('加载视频数据失败:', error);
+        showError('加载视频数据失败，请稍后重试。');
+        showLoading(false);
     }
+}
 
-    // 渲染视频列表
-    function renderVideos(videos) {
-        if (videos.length === 0) {
-            elements.noResults.classList.remove('hidden');
-            elements.videoContainer.innerHTML = '';
-            return;
-        }
+// 显示加载指示器
+function showLoading(show) {
+    const loadingElement = document.getElementById('loading');
+    if (loadingElement) {
+        loadingElement.classList.toggle('hidden', !show);
+    }
+}
 
-        elements.noResults.classList.add('hidden');
-        elements.videoContainer.innerHTML = videos.map(video => `
+// 显示错误信息
+function showError(message) {
+    const container = document.getElementById('video-container');
+    if (container) {
+        container.innerHTML = `<p class="error">${message}</p>`;
+    }
+}
+
+// 显示视频列表
+function displayVideos(videoData) {
+    const container = document.getElementById('video-container');
+    if (!container) return;
+    
+    if (!videoData || videoData.length === 0) {
+        container.innerHTML = '<p>暂无视频内容</p>';
+        return;
+    }
+    
+    let html = '<div class="video-grid">';
+    
+    videoData.forEach(video => {
+        html += `
             <div class="video-card" data-id="${video.id}">
                 <div class="video-thumbnail">
-                    <img src="${video.thumbnail_url || 'https://placehold.co/300x200'}" alt="${video.title}" class="thumbnail-img">
-                    <div class="video-duration">${video.formattedDuration}</div>
+                    ${video.thumbnail_url ? 
+                        `<img src="${video.thumbnail_url}" alt="${video.title}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"200\" height=\"150\" viewBox=\"0 0 200 150\"><rect width=\"200\" height=\"150\" fill=\"%23333\"/><text x=\"50%\" y=\"50%\" font-family=\"Arial\" font-size=\"16\" fill=\"white\" text-anchor=\"middle\" dy=\".3em\">视频缩略图</text></svg>'">` :
+                        `<div class="video-placeholder">▶️</div>`
+                    }
+                    <div class="video-duration">${formatDuration(video.duration)}</div>
                 </div>
                 <div class="video-info">
                     <h3 class="video-title">${video.title}</h3>
-                    <p class="video-meta">${video.formattedPublishDate} | ${video.views_count || 0} 次观看</p>
-                    <div class="video-tags-small">
-                        ${video.tags.slice(0, 2).map(tag => `<span class="tag-small">${tag}</span>`).join('')}
-                        ${video.tags.length > 2 ? `<span class="tag-small">+${video.tags.length - 2}</span>` : ''}
-                    </div>
-                    <button class="btn play-video" data-id="${video.id}">播放</button>
+                    <p class="video-description">${video.description || ''}</p>
+                    <p class="video-meta">
+                        <span class="video-date">${formatDate(video.publish_date)}</span>
+                        <span class="video-category">${video.category}</span>
+                    </p>
                 </div>
             </div>
-        `).join('');
+        `;
+    });
+    
+    html += '</div>';
+    
+    container.innerHTML = html;
+}
 
-        // 为每个视频卡片添加点击事件
-        document.querySelectorAll('.play-video').forEach(button => {
-            button.addEventListener('click', function () {
-                const videoId = this.getAttribute('data-id');
-                openVideoDetail(videoId);
-            });
+// 格式化时长
+function formatDuration(seconds) {
+    if (!seconds) return '';
+    
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    
+    if (hours > 0) {
+        return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    } else {
+        return `${minutes}:${secs.toString().padStart(2, '0')}`;
+    }
+}
+
+// 格式化日期
+function formatDate(dateString) {
+    if (!dateString) return '';
+    
+    const date = new Date(dateString);
+    return date.toLocaleDateString('zh-CN');
+}
+
+// 绑定事件
+function bindEvents() {
+    // 分类筛选
+    const categoryFilter = document.getElementById('category-filter');
+    if (categoryFilter) {
+        categoryFilter.addEventListener('change', filterVideos);
+    }
+    
+    // 搜索输入
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        let searchTimeout;
+        searchInput.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(filterVideos, 300);
         });
     }
-
-    // 打开视频详情模态框
-    async function openVideoDetail(videoId) {
-        const video = allVideos.find(v => v.id === videoId);
-        if (!video) return;
-
-        currentVideo = video;
-
-        // 更新模态框内容
-        elements.videoPlayer.src = video.video_url || '';
-        elements.modalTitle.textContent = video.title;
-        elements.modalPublishDate.textContent = video.formattedPublishDate;
-        elements.modalDuration.textContent = video.formattedDuration;
-        elements.modalViews.textContent = `${video.views_count || 0} 次观看`;
-        elements.modalDescription.textContent = video.description || '暂无描述';
-
-        // 渲染标签
-        if (video.tags.length > 0) {
-            elements.videoTags.innerHTML = video.tags.map(tag => `<span class="tag">${tag}</span>`).join('');
-        } else {
-            elements.videoTags.innerHTML = '<span class="tag">无标签</span>';
-        }
-
-        // 更新收藏按钮状态
-        updateFavoriteButton();
-
-        // 加载评论
-        await loadComments(videoId);
-
-        // 显示模态框
-        elements.modal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden'; // 防止背景滚动
-
-        // 自动播放视频
-        setTimeout(() => {
-            elements.videoPlayer.play().catch(e => console.log("自动播放被阻止:", e));
-        }, 500);
+    
+    // 重置筛选
+    const resetButton = document.getElementById('reset-filters');
+    if (resetButton) {
+        resetButton.addEventListener('click', resetFilters);
     }
-
-    // 关闭视频模态框
-    function closeVideoModal() {
-        elements.modal.classList.add('hidden');
-        document.body.style.overflow = ''; // 恢复背景滚动
-        
-        // 暂停视频播放
-        elements.videoPlayer.pause();
-        elements.videoPlayer.currentTime = 0;
-        
-        currentVideo = null;
-    }
-
-    // 更新收藏按钮状态
-    function updateFavoriteButton() {
-        // 这里应该检查用户是否已经收藏了这个视频
-        // 由于没有实际的用户认证，我们暂时只做一个简单的切换效果
-        const isFavorite = userFavorites.includes(currentVideo.id);
-        elements.favoriteButton.textContent = isFavorite ? '已收藏' : '收藏';
-        elements.favoriteButton.classList.toggle('favorited', isFavorite);
-    }
-
-    // 切换收藏状态
-    async function toggleFavorite() {
-        if (!currentVideo) return;
-
-        try {
-            // 检查是否已收藏
-            const { data: existingFavorites, error: fetchError } = await supabase
-                .from('collections')
-                .select('id')
-                .eq('user_id', 'current_user_id') // 实际应用中应该是真实的用户ID
-                .eq('item_type', 'video')
-                .eq('item_id', currentVideo.id);
-
-            if (fetchError) throw fetchError;
-
-            if (existingFavorites.length > 0) {
-                // 取消收藏
-                const { error } = await supabase
-                    .from('collections')
-                    .delete()
-                    .eq('id', existingFavorites[0].id);
-
-                if (error) throw error;
-
-                elements.favoriteButton.textContent = '收藏';
-                elements.favoriteButton.classList.remove('favorited');
-            } else {
-                // 添加收藏
-                const { error } = await supabase
-                    .from('collections')
-                    .insert({
-                        user_id: 'current_user_id', // 实际应用中应该是真实的用户ID
-                        item_type: 'video',
-                        item_id: currentVideo.id
-                    });
-
-                if (error) throw error;
-
-                elements.favoriteButton.textContent = '已收藏';
-                elements.favoriteButton.classList.add('favorited');
+    
+    // 视频卡片点击
+    const container = document.getElementById('video-container');
+    if (container) {
+        container.addEventListener('click', (e) => {
+            const card = e.target.closest('.video-card');
+            if (card) {
+                const videoId = card.getAttribute('data-id');
+                showVideoDetails(videoId);
             }
-        } catch (error) {
-            console.error('收藏操作失败:', error);
-            alert('收藏操作失败，请稍后重试');
-        }
+        });
     }
-
-    // 加载评论
-    async function loadComments(videoId) {
-        try {
-            const { data: comments, error } = await supabase
-                .from('comments')
-                .select(`
-                    *,
-                    users(username, avatar_url)
-                `)
-                .eq('target_type', 'video')
-                .eq('target_id', videoId)
-                .order('created_at', { ascending: false });
-
-            if (error) throw error;
-
-            renderComments(comments);
-        } catch (error) {
-            console.error('加载评论失败:', error);
-            elements.commentsContainer.innerHTML = '<p>加载评论失败</p>';
-        }
+    
+    // 模态框关闭按钮
+    const closeButtons = document.querySelectorAll('#video-modal .close');
+    closeButtons.forEach(button => {
+        button.addEventListener('click', closeVideoModal);
+    });
+    
+    // 点击模态框背景关闭
+    const modal = document.getElementById('video-modal');
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeVideoModal();
+            }
+        });
     }
+}
 
-    // 渲染评论
-    function renderComments(comments) {
-        if (comments.length === 0) {
-            elements.commentsContainer.innerHTML = '<p class="no-comments">暂无评论，快来抢沙发吧！</p>';
+// 筛选视频
+async function filterVideos() {
+    try {
+        // 显示加载指示器
+        showLoading(true);
+        
+        // 获取筛选条件
+        const category = document.getElementById('category-filter')?.value;
+        const search = document.getElementById('search-input')?.value;
+        
+        // 构造筛选参数
+        const filters = {};
+        if (category) filters.category = category;
+        if (search) filters.search = search;
+        
+        // 搜索视频
+        const videoData = await videoApi.searchVideos(filters);
+        
+        // 显示结果
+        displayVideos(videoData);
+        
+        // 隐藏加载指示器
+        showLoading(false);
+        
+        // 显示/隐藏无结果提示
+        const noResults = document.getElementById('no-results');
+        if (noResults) {
+            noResults.classList.toggle('hidden', videoData.length > 0);
+        }
+    } catch (error) {
+        console.error('筛选视频失败:', error);
+        showError('筛选视频失败，请稍后重试。');
+        showLoading(false);
+    }
+}
+
+// 重置筛选
+function resetFilters() {
+    // 重置筛选表单
+    const categoryFilter = document.getElementById('category-filter');
+    const searchInput = document.getElementById('search-input');
+    
+    if (categoryFilter) categoryFilter.value = '';
+    if (searchInput) searchInput.value = '';
+    
+    // 重新加载视频
+    loadVideos();
+}
+
+// 显示视频详情
+async function showVideoDetails(videoId) {
+    try {
+        // 获取视频详情
+        const video = await searchManager.getVideoById(videoId);
+        if (!video) {
+            alert('获取视频详情失败');
             return;
         }
-
-        elements.commentsContainer.innerHTML = comments.map(comment => `
-            <div class="comment">
-                <div class="comment-avatar">
-                    <img src="${comment.users?.avatar_url || 'https://placehold.co/40'}" alt="头像">
+        
+        // 填充模态框内容
+        const modalBody = document.querySelector('#video-modal .modal-body');
+        if (modalBody) {
+            modalBody.innerHTML = `
+                <div class="video-player-area">
+                    ${video.video_url ? 
+                        `<video id="video-player" controls>
+                            <source src="${video.video_url}" type="video/mp4">
+                            您的浏览器不支持视频播放。
+                        </video>` :
+                        `<div class="video-unavailable">
+                            <p>视频暂不可用</p>
+                            ${video.external_url ? 
+                                `<a href="${video.external_url}" target="_blank" class="btn">前往观看</a>` : 
+                                ''
+                            }
+                        </div>`
+                    }
                 </div>
-                <div class="comment-content">
-                    <div class="comment-author">${comment.users?.username || '匿名用户'}</div>
-                    <div class="comment-text">${comment.content}</div>
-                    <div class="comment-date">${formatDateTime(comment.created_at)}</div>
+                
+                <div class="video-info">
+                    <h3 id="video-title">${video.title}</h3>
+                    <p id="video-description">${video.description || ''}</p>
+                    <div class="video-meta">
+                        <span id="video-date">发布日期: ${formatDate(video.publish_date)}</span>
+                        <span id="video-category">分类: ${video.category}</span>
+                        <span id="video-duration">时长: ${formatDuration(video.duration)}</span>
+                    </div>
                 </div>
-            </div>
-        `).join('');
-    }
-
-    // 提交评论
-    async function submitComment() {
-        const content = elements.commentText.value.trim();
-        if (!content || !currentVideo) return;
-
-        try {
-            const { data, error } = await supabase
-                .from('comments')
-                .insert({
-                    content: content,
-                    user_id: 'current_user_id', // 实际应用中应该是真实的用户ID
-                    target_type: 'video',
-                    target_id: currentVideo.id
-                })
-                .select()
-                .single();
-
-            if (error) throw error;
-
-            // 清空输入框
-            elements.commentText.value = '';
-
-            // 重新加载评论
-            await loadComments(currentVideo.id);
-        } catch (error) {
-            console.error('提交评论失败:', error);
-            alert('提交评论失败，请稍后重试');
+            `;
         }
-    }
-
-    // 筛选视频
-    function filterVideos() {
-        const category = elements.categoryFilter.value;
-        const searchTerm = elements.searchInput.value.toLowerCase().trim();
-
-        filteredVideos = allVideos.filter(video => {
-            // 分类筛选
-            if (category && !video.tags.includes(category)) {
-                return false;
-            }
-
-            // 搜索关键词筛选
-            if (searchTerm && !video.title.toLowerCase().includes(searchTerm)) {
-                return false;
-            }
-
-            return true;
-        });
-
-        renderVideos(filteredVideos);
-    }
-
-    // 重置筛选器
-    function resetFilters() {
-        elements.categoryFilter.value = '';
-        elements.searchInput.value = '';
-        filteredVideos = [...allVideos];
-        renderVideos(filteredVideos);
-    }
-
-    // 工具函数：格式化时长（秒 -> mm:ss）
-    function formatDuration(seconds) {
-        if (!seconds) return '0:00';
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${mins}:${secs.toString().padStart(2, '0')}`;
-    }
-
-    // 工具函数：格式化日期 (YYYY-MM-DD -> YYYY年MM月DD日)
-    function formatDate(dateString) {
-        if (!dateString) return '未知日期';
-        const date = new Date(dateString);
-        return `${date.getFullYear()}年${(date.getMonth() + 1).toString().padStart(2, '0')}月${date.getDate().toString().padStart(2, '0')}日`;
-    }
-
-    // 工具函数：格式化日期时间
-    function formatDateTime(dateTimeString) {
-        if (!dateTimeString) return '';
-        const date = new Date(dateTimeString);
-        return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-    }
-
-    // 显示/隐藏加载指示器
-    function showLoading(show) {
-        if (show) {
-            elements.loadingIndicator.classList.remove('hidden');
-        } else {
-            elements.loadingIndicator.classList.add('hidden');
+        
+        // 显示模态框
+        const modal = document.getElementById('video-modal');
+        if (modal) {
+            modal.classList.remove('hidden');
         }
+    } catch (error) {
+        console.error('显示视频详情失败:', error);
+        alert('获取视频详情失败，请稍后重试。');
     }
+}
 
-    console.log('视频模块已加载');
+// 关闭视频模态框
+function closeVideoModal() {
+    const modal = document.getElementById('video-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+    
+    // 暂停视频播放
+    const videoPlayer = document.getElementById('video-player');
+    if (videoPlayer) {
+        videoPlayer.pause();
+    }
+}
 
-})();
+export default { init };
