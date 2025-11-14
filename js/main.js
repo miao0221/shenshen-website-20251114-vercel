@@ -51,7 +51,8 @@ async function checkAuthStatus() {
                 });
             }
         } else {
-            authStatusDiv.innerHTML = '<p>您尚未登录 <a href="pages/login.html">点击登录</a></p>';
+            // 使用相对路径确保正确导航到登录页面
+            authStatusDiv.innerHTML = '<p>您尚未登录 <a href="./pages/login.html">点击登录</a></p>';
         }
     } catch (error) {
         console.error('检查认证状态时发生错误:', error);

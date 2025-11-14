@@ -6,7 +6,14 @@ function emergencyCloseSearch() {
     '.search-modal', 
     '.search-popup',
     '.search-container',
-    '[class*="search"]'
+    '[class*="search"]',
+    '.modal',
+    '.popup',
+    '.overlay',
+    '[class*="modal"]',
+    '[class*="overlay"]',
+    '[class*="popup"]',
+    '.fixed-overlay'
   ];
   
   searchSelectors.forEach(selector => {
@@ -17,6 +24,9 @@ function emergencyCloseSearch() {
       el.style.opacity = '0';
     });
   });
+  
+  // 特别处理body的overflow属性，确保页面可以滚动
+  document.body.style.overflow = 'auto';
 }
 
 // 立即执行
@@ -25,3 +35,6 @@ window.addEventListener('load', emergencyCloseSearch);
 
 // 也添加到全局窗口对象，方便手动调用
 window.closeAllSearch = emergencyCloseSearch;
+
+// 定期检查并关闭可能意外出现的遮挡层
+setInterval(emergencyCloseSearch, 1000);

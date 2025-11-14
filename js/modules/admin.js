@@ -14,9 +14,10 @@ class AdminManager {
     async init() {
         document.addEventListener('DOMContentLoaded', async () => {
             // 检查用户是否已登录且具有管理员权限
-            const authState = await authManager.checkAuthState();
-            if (!authState.isLoggedIn) {
-                window.location.href = 'login.html';
+            const { isLoggedIn } = await authManager.checkAuthState();
+            if (!isLoggedIn) {
+                alert('请先登录');
+                window.location.href = '../pages/login.html';
                 return;
             }
 

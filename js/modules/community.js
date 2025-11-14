@@ -55,7 +55,7 @@ class CommunityManager {
         if (!this.currentUser) {
             this.showMessage('请先登录后再发帖', 'error');
             setTimeout(() => {
-                window.location.href = 'login.html';
+                window.location.href = '../pages/login.html';
             }, 1500);
             return;
         }
@@ -192,7 +192,7 @@ class CommunityManager {
         if (!this.currentUser) {
             this.showMessage('请先登录后再点赞', 'error');
             setTimeout(() => {
-                window.location.href = 'login.html';
+                window.location.href = '../pages/login.html';
             }, 1500);
             return;
         }
@@ -292,7 +292,7 @@ class CommunityManager {
         if (!this.currentUser) {
             this.showMessage('请先登录后再评论', 'error');
             setTimeout(() => {
-                window.location.href = 'login.html';
+                window.location.href = '../pages/login.html';
             }, 1500);
             return;
         }

@@ -13,13 +13,14 @@ class ProfileManager {
     init() {
         document.addEventListener('DOMContentLoaded', async () => {
             // 检查用户是否已登录
-            const authState = await authManager.checkAuthState();
-            if (!authState.isLoggedIn) {
-                window.location.href = 'login.html';
+            const { isLoggedIn, user } = await authManager.checkAuthState();
+            if (!isLoggedIn) {
+                alert('请先登录');
+                window.location.href = '../pages/login.html';
                 return;
             }
 
-            this.currentUser = authState.user;
+            this.currentUser = user;
             this.setupElements();
             this.setupEventListeners();
             this.loadProfile();

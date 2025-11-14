@@ -900,6 +900,15 @@ main {
     display: none;
 }
 
+/* 紧急修复：隐藏所有可能的遮挡层元素 */
+.fixed-overlay, 
+.modal, 
+.popup,
+[class*="overlay"],
+[class*="modal"] {
+  display: none !important;
+}
+
 /* 模态框样式 */
 .modal {
     position: fixed;
