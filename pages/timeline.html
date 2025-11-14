@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>时间轴 - 周深粉丝网站</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-brand">周深粉丝网</div>
+            <div class="nav-search-container">
+                <button class="search-toggle" id="search-toggle">🔍</button>
+                <div class="nav-search hidden" id="nav-search">
+                    <input type="text" id="global-search" placeholder="搜索音乐、视频、采访...">
+                    <div id="search-suggestions" class="search-suggestions hidden">
+                        <!-- 搜索建议将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="../index.html" class="nav-link">首页</a></li>
+                <li class="nav-item"><a href="music.html" class="nav-link">音乐</a></li>
+                <li class="nav-item"><a href="video.html" class="nav-link">视频</a></li>
+                <li class="nav-item"><a href="timeline.html" class="nav-link">时间轴</a></li>
+                <li class="nav-item"><a href="awards.html" class="nav-link">奖项</a></li>
+                <li class="nav-item"><a href="business.html" class="nav-link">商务</a></li>
+                <li class="nav-item"><a href="interviews.html" class="nav-link">采访</a></li>
+                <li class="nav-item"><a href="community.html" class="nav-link">粉丝广场</a></li>
+                <li class="nav-item"><a href="profile.html" class="nav-link">个人中心</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <main>
+        <section class="timeline-section">
+            <h1>重要时刻</h1>
+            
+            <!-- 视图切换按钮 -->
+            <div class="view-toggle">
+                <button id="timeline-view" class="btn view-btn active">时间轴视图</button>
+                <button id="calendar-view" class="btn view-btn">日历视图</button>
+            </div>
+            
+            <!-- 筛选器 -->
+            <div class="timeline-filters">
+                <div class="filter-group">
+                    <label for="event-type-filter">事件类型:</label>
+                    <select id="event-type-filter">
+                        <option value="">全部</option>
+                        <option value="music">音乐作品</option>
+                        <option value="video">视频发布</option>
+                        <option value="award">获奖记录</option>
+                        <option value="event">重要事件</option>
+                    </select>
+                </div>
+                
+                <button id="reset-filters" class="btn">重置筛选</button>
+            </div>
+            
+            <!-- 时间轴展示区域 -->
+            <div id="timeline-container" class="timeline-container">
+                <div id="timeline-content" class="timeline-content">
+                    <!-- 时间轴内容将通过JavaScript动态生成 -->
+                </div>
+            </div>
+            
+            <!-- 日历视图区域 -->
+            <div id="calendar-container" class="calendar-container hidden">
+                <div class="calendar-header">
+                    <button id="prev-month" class="btn nav-btn">&lt;</button>
+                    <h2 id="current-month-year"></h2>
+                    <button id="next-month" class="btn nav-btn">&gt;</button>
+                </div>
+                <div class="calendar">
+                    <div class="calendar-header-days">
+                        <div class="calendar-day-header">日</div>
+                        <div class="calendar-day-header">一</div>
+                        <div class="calendar-day-header">二</div>
+                        <div class="calendar-day-header">三</div>
+                        <div class="calendar-day-header">四</div>
+                        <div class="calendar-day-header">五</div>
+                        <div class="calendar-day-header">六</div>
+                    </div>
+                    <div id="calendar-days" class="calendar-days">
+                        <!-- 日历内容将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 加载指示器 -->
+            <div id="loading" class="loading hidden">
+                <p>正在加载时间轴...</p>
+            </div>
+            
+            <!-- 无结果提示 -->
+            <div id="no-results" class="no-results hidden">
+                <p>未找到符合条件的事件</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- 事件详情模态框 -->
+    <div id="event-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div class="modal-body">
+                <div class="event-detail-header">
+                    <h2 id="modal-event-title"></h2>
+                    <p class="event-date" id="modal-event-date"></p>
+                </div>
+                
+                <div class="event-detail-content">
+                    <div class="event-type" id="modal-event-type"></div>
+                    <div class="event-description" id="modal-event-description"></div>
+                    
+                    <div class="event-media" id="modal-event-media">
+                        <!-- 媒体内容将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 搜索结果模态框 -->
+    <div id="search-modal" class="modal hidden">
+        <div class="modal-content search-results">
+            <span class="close">&times;</span>
+            <div class="modal-body">
+                <h2>搜索结果</h2>
+                <div id="search-results-container">
+                    <!-- 搜索结果将通过JavaScript动态生成 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2025 周深粉丝网站. 版权所有.</p>
+    </footer>
+
+    <script type="module" src="../js/config.js"></script>
+    <script type="module" src="../js/modules/timeline.js"></script>
+    <script type="module" src="../js/navigation.js"></script>
+</body>
+</html>

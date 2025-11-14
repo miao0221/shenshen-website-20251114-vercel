@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>周深粉丝网站</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-brand">周深粉丝网</div>
+            <div class="nav-search-container">
+                <button class="search-toggle" id="search-toggle">🔍</button>
+                <div class="nav-search hidden" id="nav-search">
+                    <input type="text" id="global-search" placeholder="搜索音乐、视频、采访...">
+                    <div id="search-suggestions" class="search-suggestions hidden">
+                        <!-- 搜索建议将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="index.html" class="nav-link">首页</a></li>
+                <li class="nav-item"><a href="pages/music.html" class="nav-link">音乐</a></li>
+                <li class="nav-item"><a href="pages/video.html" class="nav-link">视频</a></li>
+                <li class="nav-item"><a href="pages/timeline.html" class="nav-link">时间轴</a></li>
+                <li class="nav-item"><a href="pages/awards.html" class="nav-link">奖项</a></li>
+                <li class="nav-item"><a href="pages/business.html" class="nav-link">商务</a></li>
+                <li class="nav-item"><a href="pages/interviews.html" class="nav-link">采访</a></li>
+                <li class="nav-item"><a href="pages/fans.html" class="nav-link">粉丝广场</a></li>
+                <li class="nav-item"><a href="pages/login.html" class="nav-link">登录/注册</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <main>
+        <section class="hero">
+            <h1>欢迎来到周深粉丝网站</h1>
+            <p>这里是周深粉丝的聚集地，分享他的音乐、视频和最新动态。</p>
+            <div id="auth-status">
+                <!-- 登录状态会在这里显示 -->
+            </div>
+        </section>
+    </main>
+
+    <!-- 搜索结果模态框 -->
+    <div id="search-modal" class="modal hidden">
+        <div class="modal-content search-results">
+            <span class="close">&times;</span>
+            <div class="modal-body">
+                <h2>搜索结果</h2>
+                <div id="search-results-container">
+                    <!-- 搜索结果将通过JavaScript动态生成 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/config.js"></script>
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

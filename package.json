@@ -1,0 +1,31 @@
+{
+  "name": "zhoushen-fansite",
+  "version": "1.0.0",
+  "description": "周深粉丝网站 - 一个展示周深音乐、视频和相关信息的网站",
+  "main": "index.html",
+  "scripts": {
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "dev": "vite"
+  },
+  "keywords": [
+    "zhoushen",
+    "music",
+    "fansite",
+    "entertainment"
+  ],
+  "author": "周深粉丝",
+  "license": "MIT",
+  "devDependencies": {
+    "vite": "^4.0.0"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}
