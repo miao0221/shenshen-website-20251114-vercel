@@ -6,7 +6,7 @@ import { videoApi } from '../api/videoApi.js';
 
 class SearchManager {
     constructor() {
-        this.supabase = initSupabase();
+        this.supabase = supabase;
         this.searchTimeout = null;
         this.musicCache = new Map();
         this.videoCache = new Map();

@@ -1,26 +1,26 @@
-import { renderHomePage } from './pages/home.js';
-import { renderMusicPage } from './pages/music.js';
+import { renderHomePage } from './pages/Home.js';
+import MusicPage from './pages/Music.js';
 import { renderVideosPage } from './pages/videos.js';
-import { renderTimelinePage } from './pages/timeline.js';
-import { renderAwardsPage } from './pages/awards.js';
-import { renderCommunityPage } from './pages/community.js';
-import { renderBusinessPage } from './pages/business.js';
-import { renderInterviewsPage } from './pages/interviews.js';
-import { renderProfilePage } from './pages/profile.js';
-import { renderAdminPage } from './pages/admin.js';
+import { renderTimelinePage } from './pages/Timeline.js';
+import { renderAwardsPage } from './pages/Awards.js';
+import CommunityPage from './pages/Community.js';
+import { renderBusinessPage } from './pages/Business.js';
+import InterviewsPage from './pages/Interviews.js';
+import ProfilePage from './pages/Profile.js';
+import AdminPage from './pages/Admin.js';
 
 // 路由配置
 const routes = {
     '/': renderHomePage,
-    '/music': renderMusicPage,
+    '/music': MusicPage,
     '/videos': renderVideosPage,
     '/timeline': renderTimelinePage,
     '/awards': renderAwardsPage,
-    '/community': renderCommunityPage,
+    '/community': CommunityPage,
     '/business': renderBusinessPage,
-    '/interviews': renderInterviewsPage,
-    '/profile': renderProfilePage,
-    '/admin': renderAdminPage
+    '/interviews': InterviewsPage,
+    '/profile': ProfilePage,
+    '/admin': AdminPage
 };
 
 let currentPath = '/';

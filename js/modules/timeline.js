@@ -1,5 +1,8 @@
 // 时间轴模块
-import { initSupabase } from '../../config.js';
+import { initSupabase } from '../config.js';
+import { searchManager } from './search.js';
+
+// 初始化时间轴模块
 
 (function () {
     'use strict';

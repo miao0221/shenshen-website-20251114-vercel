@@ -1,5 +1,5 @@
 // 视频模块
-import { initSupabase } from '../../config.js';
+import { initSupabase } from '../config.js';
 import { videoApi } from '../api/videoApi.js';
 import { searchManager } from './search.js';
 

@@ -1,5 +1,5 @@
 // 音乐模块
-import { initSupabase } from '../../config.js';
+import { initSupabase } from '../config.js';
 import { musicApi } from '../api/musicApi.js';
 import { searchManager } from './search.js';
 

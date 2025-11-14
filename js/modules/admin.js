@@ -1,7 +1,6 @@
 // 后台管理模块
-import { initSupabase } from '../config.js';
-import { checkAuthStatus, getCurrentUser } from './auth.js';
 import { supabase } from '../api/supabaseClient.js';
+import { checkAuthStatus, getCurrentUser } from './auth.js';
 
 // 初始化管理模块
 export async function init() {
@@ -146,7 +145,7 @@ import { authManager } from './auth.js';
 
 class AdminManager {
     constructor() {
-        this.supabase = initSupabase();
+        this.supabase = supabase;
         this.currentUser = null;
         this.activeTab = 'content';
         this.tags = [];

@@ -1,5 +1,4 @@
 // 社区模块
-import { initSupabase } from '../config.js';
 import { checkAuthStatus, getCurrentUser } from './auth.js';
 import { supabase } from '../api/supabaseClient.js';
 
