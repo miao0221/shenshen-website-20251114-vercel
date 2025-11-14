@@ -51,7 +51,6 @@ async function checkAuthStatus() {
                 });
             }
         } else {
-            // 使用相对路径确保正确导航到登录页面
             authStatusDiv.innerHTML = '<p>您尚未登录 <a href="./pages/login.html">点击登录</a></p>';
         }
     } catch (error) {
