@@ -24,6 +24,18 @@ ul {
     list-style: none;
 }
 
+/* 搜索覆盖层样式 */
+.search-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    z-index: 1000;
+    display: none; /* 默认隐藏 */
+}
+
 /* 搜索框容器样式 */
 #global-search-container {
     display: none !important;
