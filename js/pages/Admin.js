@@ -5,14 +5,48 @@ export default class AdminPage {
   
   async render() {
     return `
-      <section class="admin-section">
-        <h1>管理后台</h1>
-        <p>网站管理功能。</p>
+      <div class="container">
+        <section class="page-header">
+            <h1>后台管理</h1>
+            <p>管理网站内容和用户</p>
+        </section>
         
-        <div id="admin-container">
-          <p>正在加载管理界面...</p>
-        </div>
-      </section>
+        <section class="admin-dashboard">
+            <div class="cards-grid">
+                <div class="card">
+                    <div class="card-content">
+                        <h3 class="card-title">音乐管理</h3>
+                        <p class="card-text">管理音乐作品信息</p>
+                        <button class="btn btn-primary">进入</button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-content">
+                        <h3 class="card-title">视频管理</h3>
+                        <p class="card-text">管理视频内容信息</p>
+                        <button class="btn btn-primary">进入</button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-content">
+                        <h3 class="card-title">用户管理</h3>
+                        <p class="card-text">管理系统用户</p>
+                        <button class="btn btn-primary">进入</button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-content">
+                        <h3 class="card-title">数据统计</h3>
+                        <p class="card-text">查看网站统计数据</p>
+                        <button class="btn btn-primary">进入</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+      </div>
     `;
   }
   

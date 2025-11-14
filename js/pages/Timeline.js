@@ -87,3 +87,59 @@ export default class TimelinePage {
     }
   }
 }
+
+export async function renderTimelinePage() {
+    return `
+        <div class="container">
+            <section class="page-header">
+                <h1>时间轴</h1>
+                <p>周深演艺生涯的重要时刻</p>
+            </section>
+            
+            <section class="timeline-filters">
+                <div class="filter-group">
+                    <label>年份:</label>
+                    <select id="timeline-year-filter">
+                        <option value="">全部年份</option>
+                        <option value="2023">2023年</option>
+                        <option value="2022">2022年</option>
+                        <option value="2021">2021年</option>
+                        <option value="2020">2020年</option>
+                        <option value="2019">2019年</option>
+                        <option value="2018">2018年</option>
+                        <option value="2017">2017年</option>
+                        <option value="2016">2016年</option>
+                        <option value="2015">2015年</option>
+                        <option value="2014">2014年</option>
+                    </select>
+                </div>
+            </section>
+            
+            <section class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-date">2014-07-25</div>
+                    <div class="timeline-content card">
+                        <h3 class="card-title">《中国好声音》盲选</h3>
+                        <p class="card-text">周深参加《中国好声音》第三季，以一首《欢颜》获得三位导师转身</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-date">2016-10-14</div>
+                    <div class="timeline-content card">
+                        <h3 class="card-title">首张个人专辑《深的深》发行</h3>
+                        <p class="card-text">周深发行首张个人专辑《深的深》，主打歌曲《大鱼》广受好评</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-date">2021-11-05</div>
+                    <div class="timeline-content card">
+                        <h3 class="card-title">《光亮》发布</h3>
+                        <p class="card-text">周深为纪录片《紫禁城》演唱的主题歌《光亮》发布，引发热议</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    `;
+}

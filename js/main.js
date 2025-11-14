@@ -3,19 +3,22 @@ import { appState } from './core/AppState.js';
 import { initializeAuth } from './modules/auth.js';
 import { searchManager } from './modules/search.js';
 import { eventBus } from './utils/EventBus.js';
+import { initRouter } from './router.js';
+import { initializeSupabase } from './supabase.js';
+import { loadComponent } from './components/header.js';
 
 // 初始化应用
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('初始化应用...');
+    // 初始化Supabase客户端
+    initializeSupabase();
     
-    // 初始化认证模块
-    await initializeAuth();
+    // 加载头部组件
+    await loadComponent();
     
-    // 初始化搜索管理器
-    searchManager.init();
+    // 初始化路由系统
+    initRouter();
     
-    // 检查认证状态
-    checkAuthStatus();
+    console.log('周深粉丝网站应用已启动');
 });
 
 // 检查认证状态

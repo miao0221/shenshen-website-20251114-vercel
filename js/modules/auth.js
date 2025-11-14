@@ -1,6 +1,5 @@
 // 认证模块
-import { supabase } from '../api/supabaseClient.js';
-import { userManager } from '../core/UserManager.js';
+import { getSupabase } from '../supabase.js';
 
 // 认证状态变量
 let currentUser = null;
@@ -11,8 +10,18 @@ export async function initializeAuth() {
     console.log('初始化认证模块...');
     
     try {
+        const supabase = getSupabase();
+        if (!supabase) {
+            throw new Error('Supabase客户端未初始化');
+        }
+        
         // 获取当前会话
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+            console.error('获取会话失败:', error);
+            return;
+        }
         
         if (session) {
             currentUser = session.user;
@@ -28,9 +37,11 @@ export async function initializeAuth() {
             
             switch (event) {
                 case 'SIGNED_IN':
-                    currentUser = session.user;
-                    isLoggedIn = true;
-                    handleAuthStateChange(true, currentUser);
+                    if (session) {
+                        currentUser = session.user;
+                        isLoggedIn = true;
+                        handleAuthStateChange(true, currentUser);
+                    }
                     break;
                 case 'SIGNED_OUT':
                     currentUser = null;
@@ -38,12 +49,16 @@ export async function initializeAuth() {
                     handleAuthStateChange(false, null);
                     break;
                 case 'TOKEN_REFRESHED':
-                    currentUser = session.user;
-                    handleAuthStateChange(true, currentUser);
+                    if (session) {
+                        currentUser = session.user;
+                        handleAuthStateChange(true, currentUser);
+                    }
                     break;
                 case 'USER_UPDATED':
-                    currentUser = session.user;
-                    handleAuthStateChange(true, currentUser);
+                    if (session) {
+                        currentUser = session.user;
+                        handleAuthStateChange(true, currentUser);
+                    }
                     break;
             }
         });
@@ -66,75 +81,106 @@ export function checkAuthStatus() {
     return isLoggedIn;
 }
 
-// 获取当前用户信息
-export function getCurrentUser() {
-    return currentUser;
+// 导出常量
+export const AuthEvents = {
+    SIGNED_IN: 'SIGNED_IN',
+    SIGNED_OUT: 'SIGNED_OUT',
+    TOKEN_REFRESHED: 'TOKEN_REFRESHED',
+    USER_UPDATED: 'USER_UPDATED'
+};
+
+// 获取当前用户
+export async function getCurrentUser() {
+    try {
+        const supabase = getSupabase();
+        if (!supabase) {
+            throw new Error('Supabase客户端未初始化');
+        }
+        
+        const { data: { user }, error } = await supabase.auth.getUser();
+        
+        if (error) {
+            throw error;
+        }
+        
+        return { success: true, user };
+    } catch (error) {
+        console.error('获取用户信息失败:', error.message);
+        return { success: false, error: error.message };
+    }
 }
 
 // 用户登录
-export async function login(email, password) {
+export async function loginUser(email, password) {
     try {
+        const supabase = getSupabase();
+        if (!supabase) {
+            throw new Error('Supabase客户端未初始化');
+        }
+        
         const { data, error } = await supabase.auth.signInWithPassword({
             email,
             password
         });
         
-        if (error) throw error;
+        if (error) {
+            throw error;
+        }
         
         currentUser = data.user;
         isLoggedIn = true;
         
-        return { success: true, user: data.user };
+        return { success: true, data };
     } catch (error) {
-        console.error('登录失败:', error);
+        console.error('登录失败:', error.message);
         return { success: false, error: error.message };
     }
 }
 
 // 用户注册
-export async function register(email, password, username) {
+export async function registerUser(email, password) {
     try {
+        const supabase = getSupabase();
+        if (!supabase) {
+            throw new Error('Supabase客户端未初始化');
+        }
+        
         const { data, error } = await supabase.auth.signUp({
             email,
-            password,
-            options: {
-                data: {
-                    username
-                }
-            }
+            password
         });
         
-        if (error) throw error;
+        if (error) {
+            throw error;
+        }
         
-        return { success: true, user: data.user };
+        return { success: true, data };
     } catch (error) {
-        console.error('注册失败:', error);
+        console.error('注册失败:', error.message);
         return { success: false, error: error.message };
     }
 }
 
 // 用户登出
-export async function logout() {
+export async function logoutUser() {
     try {
+        const supabase = getSupabase();
+        if (!supabase) {
+            throw new Error('Supabase客户端未初始化');
+        }
+        
         const { error } = await supabase.auth.signOut();
         
-        if (error) throw error;
+        if (error) {
+            throw error;
+        }
         
         currentUser = null;
         isLoggedIn = false;
         
         return { success: true };
     } catch (error) {
-        console.error('登出失败:', error);
+        console.error('登出失败:', error.message);
         return { success: false, error: error.message };
     }
 }
-
-export default {
-    initializeAuth,
-    checkAuthStatus,
-    getCurrentUser,
-    login,
-    register,
-    logout
-};

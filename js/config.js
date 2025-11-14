@@ -1,33 +1,49 @@
-// 从环境变量获取Supabase配置
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
-const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+// 应用配置和常量
 
-// Supabase配置文件
-import { createClient } from '@supabase/supabase-js';
-
-// 从环境变量获取配置
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
-
-// 检查配置是否存在
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('Supabase配置缺失，请检查环境变量设置');
-}
-
-// 创建Supabase客户端实例
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-// 初始化Supabase客户端
-function initSupabase() {
-    return supabase;
-}
-
-// 导出配置和初始化函数以及supabase实例
-export { 
-    SUPABASE_URL, 
-    SUPABASE_KEY, 
-    initSupabase
+// 应用基本信息
+export const APP_CONFIG = {
+    NAME: '周深粉丝网站',
+    VERSION: '1.0.0',
+    DESCRIPTION: '一个展示周深音乐、视频和相关信息的网站'
 };
 
-// 默认导出supabase实例
-export default supabase;
+// 音乐类型配置
+export const MUSIC_TYPES = {
+    ORIGINAL: '原唱',
+    COVER: '翻唱',
+    COLLABORATION: '合作'
+};
+
+// 音乐语言配置
+export const MUSIC_LANGUAGES = {
+    CHINESE: '中文',
+    ENGLISH: '英文',
+    OTHER: '其他'
+};
+
+// 表演形式配置
+export const PERFORMANCE_TYPES = {
+    SOLO: '独唱',
+    DUET: '合唱'
+};
+
+// 视频类型配置
+export const VIDEO_TYPES = {
+    OFFICIAL_MV: '官方MV',
+    LIVE_PERFORMANCE: '现场演出',
+    VARIETY_SHOW: '综艺节目',
+    LIVE_STREAM: '直播内容',
+    BEHIND_SCENES: '幕后花絮'
+};
+
+// 分页配置
+export const PAGINATION_CONFIG = {
+    PAGE_SIZE: 20,
+    PAGE_SIZES: [10, 20, 50, 100]
+};
+
+// 播放器配置
+export const PLAYER_CONFIG = {
+    AUTOPLAY: false,
+    VOLUME: 0.8
+};

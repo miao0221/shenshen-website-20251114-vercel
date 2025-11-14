@@ -5,65 +5,105 @@ export default class MusicPage {
   
   async render() {
     return `
-      <section class="music-section">
-        <h1>周深音乐作品</h1>
-        <p>这里收录了周深的所有音乐作品，包括单曲、专辑、影视歌曲等。</p>
-        
-        <!-- 筛选器 -->
-        <div class="music-filters">
-          <div class="filter-group">
-            <label for="year-filter">年份:</label>
-            <select id="year-filter">
-              <option value="">全部</option>
-            </select>
-          </div>
-          
-          <div class="filter-group">
-            <label for="language-filter">语言:</label>
-            <select id="language-filter">
-              <option value="">全部</option>
-              <option value="中文">中文</option>
-              <option value="英文">英文</option>
-              <option value="日文">日文</option>
-              <option value="韩文">韩文</option>
-            </select>
-          </div>
-          
-          <div class="filter-group">
-            <label for="search-input">搜索:</label>
-            <input type="text" id="search-input" placeholder="输入歌名...">
-          </div>
-          
-          <button id="reset-filters">重置筛选</button>
+        <div class="container">
+            <section class="page-header">
+                <h1>音乐作品</h1>
+                <p>周深的全部音乐作品收录</p>
+            </section>
+            
+            <section class="filters-section">
+                <div class="filter-group">
+                    <label>类型:</label>
+                    <select id="music-type-filter">
+                        <option value="">全部类型</option>
+                        <option value="original">原唱</option>
+                        <option value="cover">翻唱</option>
+                        <option value="collaboration">合作</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>语言:</label>
+                    <select id="music-language-filter">
+                        <option value="">全部语言</option>
+                        <option value="chinese">中文</option>
+                        <option value="english">英文</option>
+                        <option value="other">其他</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>年份:</label>
+                    <select id="music-year-filter">
+                        <option value="">全部年份</option>
+                        <option value="2023">2023年</option>
+                        <option value="2022">2022年</option>
+                        <option value="2021">2021年</option>
+                        <option value="2020">2020年</option>
+                        <option value="2019">2019年</option>
+                        <option value="2018">2018年</option>
+                        <option value="2017">2017年</option>
+                        <option value="2016">2016年</option>
+                        <option value="2015">2015年</option>
+                        <option value="2014">2014年</option>
+                    </select>
+                </div>
+            </section>
+            
+            <section class="music-list">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>歌曲名</th>
+                            <th>专辑</th>
+                            <th>语言</th>
+                            <th>发行日期</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>大鱼</td>
+                            <td>深的深</td>
+                            <td>中文</td>
+                            <td>2016-10-14</td>
+                            <td><button class="btn btn-secondary">详情</button></td>
+                        </tr>
+                        <tr>
+                            <td>光亮</td>
+                            <td>光亮</td>
+                            <td>中文</td>
+                            <td>2021-11-05</td>
+                            <td><button class="btn btn-secondary">详情</button></td>
+                        </tr>
+                        <tr>
+                            <td>起风了</td>
+                            <td>起风了</td>
+                            <td>中文</td>
+                            <td>2018-04-03</td>
+                            <td><button class="btn btn-secondary">详情</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+            
+            <div class="pagination">
+                <button class="pagination-btn active">1</button>
+                <button class="pagination-btn">2</button>
+                <button class="pagination-btn">3</button>
+                <button class="pagination-btn">下一页</button>
+            </div>
+
+            <!-- 音乐详情模态框 -->
+            <div id="music-modal" class="modal hidden">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <div class="modal-body">
+                        <!-- 音乐详情将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+            </div>
         </div>
-        
-        <!-- 音乐列表展示区域 -->
-        <div class="music-list">
-          <div id="music-container" class="music-grid">
-            <!-- 音乐项将通过JavaScript动态生成 -->
-          </div>
-        </div>
-        
-        <!-- 加载指示器 -->
-        <div id="loading" class="loading hidden">
-          <p>正在加载音乐...</p>
-        </div>
-        
-        <!-- 无结果提示 -->
-        <div id="no-results" class="no-results hidden">
-          <p>未找到符合条件的音乐作品</p>
-        </div>
-      </section>
-      
-      <!-- 音乐详情模态框 -->
-      <div id="music-modal" class="modal hidden">
-        <div class="modal-content">
-          <span class="close">&times;</span>
-          <div class="modal-body">
-            <!-- 音乐详情将通过JavaScript动态生成 -->
-          </div>
-        </div>
-      </div>
     `;
   }
   

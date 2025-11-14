@@ -7,57 +7,10 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <header>
-        <nav class="navbar">
-            <div class="nav-brand">周深粉丝网</div>
-            <div class="nav-search-container">
-                <button class="search-toggle" id="search-toggle">🔍</button>
-                <div class="nav-search hidden" id="nav-search">
-                    <input type="text" id="global-search" placeholder="搜索音乐、视频、采访...">
-                    <div id="search-suggestions" class="search-suggestions hidden">
-                        <!-- 搜索建议将通过JavaScript动态生成 -->
-                    </div>
-                </div>
-            </div>
-            <ul class="nav-menu">
-                <li class="nav-item"><a href="/" class="nav-link" data-route="/">首页</a></li>
-                <li class="nav-item"><a href="/music" class="nav-link" data-route="/music">音乐</a></li>
-                <li class="nav-item"><a href="/video" class="nav-link" data-route="/video">视频</a></li>
-                <li class="nav-item"><a href="/timeline" class="nav-link" data-route="/timeline">时间轴</a></li>
-                <li class="nav-item"><a href="/awards" class="nav-link" data-route="/awards">奖项</a></li>
-                <li class="nav-item"><a href="/business" class="nav-link" data-route="/business">商务</a></li>
-                <li class="nav-item"><a href="/interviews" class="nav-link" data-route="/interviews">采访</a></li>
-                <li class="nav-item"><a href="/fans" class="nav-link" data-route="/fans">粉丝广场</a></li>
-                <li class="nav-item"><a href="/login" class="nav-link" data-route="/login">登录/注册</a></li>
-            </ul>
-        </nav>
-    </header>
-    
-    <main id="app">
+    <div id="app">
         <!-- SPA内容将在这里动态加载 -->
-    </main>
-
-    <!-- 搜索结果模态框 -->
-    <div id="search-modal" class="modal hidden">
-        <div class="modal-content search-results">
-            <span class="close">&times;</span>
-            <div class="modal-body">
-                <h2>搜索结果</h2>
-                <div id="search-results-container">
-                    <!-- 搜索结果将通过JavaScript动态生成 -->
-                </div>
-            </div>
-        </div>
     </div>
 
-    <!-- 搜索覆盖层 -->
-    <div class="search-overlay"></div>
-
-    <script type="module" src="js/config.js"></script>
-    <script type="module" src="js/search-ui.js"></script>
-    <script type="module" src="js/emergency-search-close.js"></script>
-    <script type="module" src="js/core/Router.js"></script>
-    <script type="module" src="js/core/AppState.js"></script>
     <script type="module" src="js/main.js"></script>
 </body>
 </html>
