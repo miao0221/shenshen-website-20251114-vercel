@@ -17,8 +17,6 @@ if (!supabaseUrl || !supabaseAnonKey) {
 // 创建Supabase客户端实例
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-export default supabase;
-
 // 初始化Supabase客户端
 function initSupabase() {
     return supabase;
@@ -28,6 +26,8 @@ function initSupabase() {
 export { 
     SUPABASE_URL, 
     SUPABASE_KEY, 
-    initSupabase,
-    supabase
+    initSupabase
 };
+
+// 默认导出supabase实例
+export default supabase;
