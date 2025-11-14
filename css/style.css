@@ -24,6 +24,18 @@ ul {
     list-style: none;
 }
 
+/* 强制隐藏搜索框相关元素 */
+.search-overlay,
+.search-modal,
+.search-container,
+[class*="search"],
+[id*="search"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 /* 搜索覆盖层样式 */
 .search-overlay {
     position: fixed;
