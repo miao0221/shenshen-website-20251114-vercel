@@ -10,16 +10,26 @@ class AuthManager {
     async init() {
         this.supabase = await initSupabase();
         
+        // 检查supabase客户端是否已正确初始化
+        if (!this.supabase) {
+            console.error('Supabase客户端初始化失败');
+            return;
+        }
+        
         // 监听认证状态变化
         this.supabase.auth.onAuthStateChange((event, session) => {
-            if (event === 'SIGNED_IN') {
-                this.currentUser = session.user;
-                // 保存用户信息到本地存储
-                localStorage.setItem('user_session', JSON.stringify(session));
-            } else if (event === 'SIGNED_OUT') {
-                this.currentUser = null;
-                // 清除本地存储的用户信息
-                localStorage.removeItem('user_session');
+            try {
+                if (event === 'SIGNED_IN') {
+                    this.currentUser = session.user;
+                    // 保存用户信息到本地存储
+                    localStorage.setItem('user_session', JSON.stringify(session));
+                } else if (event === 'SIGNED_OUT') {
+                    this.currentUser = null;
+                    // 清除本地存储的用户信息
+                    localStorage.removeItem('user_session');
+                }
+            } catch (error) {
+                console.error('处理认证状态变化时出错:', error);
             }
         });
     }
@@ -98,7 +108,7 @@ class AuthManager {
         };
     }
 
-    // 用户注册函数
+    // 用户注册
     async signUp(email, password, username) {
         try {
             // 表单验证
@@ -106,8 +116,14 @@ class AuthManager {
             if (!validation.isValid) {
                 return { success: false, error: validation.errors.join(', ') };
             }
-
+            
             if (!this.supabase) await this.init();
+            
+            // 检查supabase客户端是否已正确初始化
+            if (!this.supabase) {
+                console.error('Supabase客户端未初始化');
+                return { success: false, error: 'Supabase客户端未初始化' };
+            }
 
             const { data, error } = await this.supabase.auth.signUp({
                 email: email,
@@ -120,16 +136,22 @@ class AuthManager {
             });
 
             if (error) throw error;
-            
+
+            // 注册成功，保存用户信息
             this.currentUser = data.user;
-            return { success: true, data };
+            
+            return { 
+                success: true, 
+                message: '注册成功，请检查邮箱确认账户',
+                user: data.user 
+            };
         } catch (error) {
             console.error('注册失败:', error.message);
             return { success: false, error: error.message };
         }
     }
 
-    // 用户登录函数
+    // 用户登录
     async signIn(email, password) {
         try {
             // 表单验证
@@ -137,8 +159,14 @@ class AuthManager {
             if (!validation.isValid) {
                 return { success: false, error: validation.errors.join(', ') };
             }
-
+            
             if (!this.supabase) await this.init();
+            
+            // 检查supabase客户端是否已正确初始化
+            if (!this.supabase) {
+                console.error('Supabase客户端未初始化');
+                return { success: false, error: 'Supabase客户端未初始化' };
+            }
 
             const { data, error } = await this.supabase.auth.signInWithPassword({
                 email: email,
@@ -146,26 +174,46 @@ class AuthManager {
             });
 
             if (error) throw error;
-            
+
+            // 登录成功，保存用户信息
             this.currentUser = data.user;
-            return { success: true, data };
+            
+            // 保存会话到本地存储
+            localStorage.setItem('user_session', JSON.stringify(data.session));
+            
+            return { 
+                success: true, 
+                message: '登录成功',
+                user: data.user 
+            };
         } catch (error) {
             console.error('登录失败:', error.message);
             return { success: false, error: error.message };
         }
     }
 
-    // 用户登出函数
+    // 用户登出
     async signOut() {
         try {
             if (!this.supabase) await this.init();
+            
+            // 检查supabase客户端是否已正确初始化
+            if (!this.supabase) {
+                console.error('Supabase客户端未初始化');
+                return { success: false, error: 'Supabase客户端未初始化' };
+            }
 
             const { error } = await this.supabase.auth.signOut();
-            
+
             if (error) throw error;
-            
+
+            // 登出成功，清除用户信息
             this.currentUser = null;
-            return { success: true };
+            
+            // 清除本地存储的会话
+            localStorage.removeItem('user_session');
+            
+            return { success: true, message: '登出成功' };
         } catch (error) {
             console.error('登出失败:', error.message);
             return { success: false, error: error.message };
@@ -176,6 +224,12 @@ class AuthManager {
     async checkAuthState() {
         try {
             if (!this.supabase) await this.init();
+            
+            // 检查supabase客户端是否已正确初始化
+            if (!this.supabase) {
+                console.error('Supabase客户端未初始化');
+                return { isLoggedIn: false, error: 'Supabase客户端未初始化' };
+            }
 
             // 首先检查本地存储中的会话
             const storedSession = localStorage.getItem('user_session');
@@ -185,16 +239,24 @@ class AuthManager {
                 const now = Math.floor(Date.now() / 1000);
                 if (session.expires_at > now) {
                     // 检查服务器上的会话是否仍然有效
-                    const { data: { session: serverSession } } = await this.supabase.auth.getSession();
-                    if (serverSession) {
-                        this.currentUser = serverSession.user;
-                        return { isLoggedIn: true, user: serverSession.user };
+                    try {
+                        const { data: { session: serverSession }, error: serverError } = await this.supabase.auth.getSession();
+                        if (serverError) throw serverError;
+                        if (serverSession) {
+                            this.currentUser = serverSession.user;
+                            return { isLoggedIn: true, user: serverSession.user };
+                        }
+                    } catch (serverError) {
+                        console.error('检查服务器会话失败:', serverError.message);
+                        // 继续执行下面的逻辑，从服务器获取新会话
                     }
                 }
             }
 
             // 如果本地存储中没有有效会话，则从服务器获取
-            const { data: { session } } = await this.supabase.auth.getSession();
+            const { data: { session }, error: sessionError } = await this.supabase.auth.getSession();
+            
+            if (sessionError) throw sessionError;
             
             if (session) {
                 this.currentUser = session.user;
@@ -218,13 +280,18 @@ class AuthManager {
         try {
             if (!this.supabase) await this.init();
             
+            // 检查supabase客户端是否已正确初始化
+            if (!this.supabase) {
+                console.error('Supabase客户端未初始化');
+                return { success: false, error: 'Supabase客户端未初始化' };
+            }
+            
             // 验证表单
-            const validation = this.validateProfileUpdateForm(username);
+            const validation = this.validateProfileForm(username);
             if (!validation.isValid) {
                 return { success: false, error: validation.errors.join(', ') };
             }
 
-            // 更新用户资料
             const updates = {
                 data: {
                     username: username
@@ -238,11 +305,19 @@ class AuthManager {
             const { data, error } = await this.supabase.auth.updateUser(updates);
 
             if (error) throw error;
+
+            // 更新成功，更新当前用户信息
+            if (data.user) {
+                this.currentUser = data.user;
+            }
             
-            this.currentUser = data.user;
-            return { success: true, data };
+            return { 
+                success: true, 
+                message: '资料更新成功',
+                user: data.user 
+            };
         } catch (error) {
-            console.error('更新用户资料失败:', error.message);
+            console.error('更新资料失败:', error.message);
             return { success: false, error: error.message };
         }
     }
@@ -257,9 +332,19 @@ class AuthManager {
         try {
             if (!this.supabase) await this.init();
             
+            // 检查supabase客户端是否已正确初始化
+            if (!this.supabase) {
+                console.error('Supabase客户端未初始化');
+                return { success: false, error: 'Supabase客户端未初始化' };
+            }
+            
             const { data: { user }, error } = await this.supabase.auth.getUser();
             
             if (error) throw error;
+            if (!user) {
+                console.error('未找到用户信息');
+                return { success: false, error: '未找到用户信息' };
+            }
             
             return {
                 success: true,

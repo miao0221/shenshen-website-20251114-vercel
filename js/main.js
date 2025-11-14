@@ -30,19 +30,31 @@ async function checkAuthStatus() {
     const authStatusDiv = document.getElementById('auth-status');
     if (!authStatusDiv) return;
     
-    const authResult = await authManager.checkAuthState();
-    
-    if (authResult.isLoggedIn) {
-        authStatusDiv.innerHTML = `
-            <p>欢迎您，${authResult.user.email}! 
-            <button id="logout-btn">登出</button></p>
-        `;
+    try {
+        const authResult = await authManager.checkAuthState();
         
-        document.getElementById('logout-btn').addEventListener('click', async () => {
-            await authManager.signOut();
-            checkAuthStatus(); // 重新检查状态
-        });
-    } else {
-        authStatusDiv.innerHTML = '<p>您尚未登录 <a href="pages/login.html">点击登录</a></p>';
+        if (authResult.isLoggedIn) {
+            authStatusDiv.innerHTML = `
+                <p>欢迎您，${authResult.user.email}! 
+                <button id="logout-btn">登出</button></p>
+            `;
+            
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', async () => {
+                    try {
+                        await authManager.signOut();
+                        checkAuthStatus(); // 重新检查状态
+                    } catch (error) {
+                        console.error('登出过程中发生错误:', error);
+                    }
+                });
+            }
+        } else {
+            authStatusDiv.innerHTML = '<p>您尚未登录 <a href="pages/login.html">点击登录</a></p>';
+        }
+    } catch (error) {
+        console.error('检查认证状态时发生错误:', error);
+        authStatusDiv.innerHTML = '<p>检查登录状态时发生错误</p>';
     }
 }
